@@ -12,35 +12,52 @@ init
 {
   vars.pointerEU = (IntPtr)0x300671168; //EU version pointer
   vars.pointerUS = (IntPtr)0x300589368; //US version pointer
+  vars.pointerJP = (IntPtr)0x3005CB968; //JP version pointer
   vars.pointer = IntPtr.Zero;
   vars.igt = 0;
   vars.previgt = 0;
   vars.igtAux = 0;
-
-  // Determining the game version
-  var bytesEU = new byte[4] {0, 0, 0, 0};
-  var bytesUS = new byte[4] {0, 0, 0, 0};
-  bool isEU = false;
-  bool isUS = false;
-
-  while (!isEU && !isUS)
-  {
-    if (memory.ReadBytes((IntPtr)vars.pointerEU, 4, out bytesEU) && BitConverter.ToInt32(bytesEU, 0) != 0)
-    {
-      isEU = true;
-      vars.pointer = vars.pointerEU;
-    }
-    else if (memory.ReadBytes((IntPtr)vars.pointerUS, 4, out bytesUS) && BitConverter.ToInt32(bytesUS, 0) < 1000000)
-    {
-      isUS = true;
-      vars.pointer = vars.pointerUS;
-    }
-    Thread.Sleep(500);
-  }
 }
 
 update
 {
+// Determining the game version
+  bool gameFound = false;
+  var bytesEU = new byte[4] {0, 0, 0, 0};
+  var bytesUS = new byte[4] {0, 0, 0, 0};
+  var bytesJP = new byte[4] {0, 0, 0, 0};
+
+  if (!gameFound)
+  {
+    if (memory.ReadBytes((IntPtr)vars.pointerEU, 4, out bytesEU))
+    {
+      Array.Reverse(bytesEU);
+      if (BitConverter.ToInt32(bytesEU, 0) >= 1 && BitConverter.ToInt32(bytesEU, 0) < 1000000)
+      {
+        gameFound = true;
+        vars.pointer = vars.pointerEU;
+      }
+    }
+    if (memory.ReadBytes((IntPtr)vars.pointerUS, 4, out bytesUS))
+    {
+      Array.Reverse(bytesUS);
+      if (BitConverter.ToInt32(bytesUS, 0) >= 1 && BitConverter.ToInt32(bytesUS, 0) < 1000000)
+      {
+        gameFound = true;
+        vars.pointer = vars.pointerUS;
+      }
+    }
+    if (memory.ReadBytes((IntPtr)vars.pointerJP, 4, out bytesJP))
+    {
+      Array.Reverse(bytesJP);
+      if (BitConverter.ToInt32(bytesJP, 0) >= 1 && BitConverter.ToInt32(bytesJP, 0) < 1000000)
+      {
+        gameFound = true;
+        vars.pointer = vars.pointerJP;
+      }
+    }
+  }
+
   var bytes = new byte[4] {0, 0, 0, 0};
   if (memory.ReadBytes((IntPtr)vars.pointer, 4, out bytes))
   {
@@ -64,7 +81,7 @@ update
 start
 {
   // Overflow autostart protection
-  if (vars.igt >= int.MinValue && vars.igt <= int.MaxValue)
+  if (vars.igt > -1 && vars.igt < 1000000)
   {
     if (settings["IGT for Challenges"])
     {
