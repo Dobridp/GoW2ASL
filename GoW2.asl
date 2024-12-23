@@ -11,12 +11,14 @@ startup
 init
 {
   vars.pointerEU = (IntPtr)0x300671168; //EU version pointer
+  vars.pointermsEU = (IntPtr)0x30067268C; //EU ms pointer
   vars.pointerUS = (IntPtr)0x300589368; //US version pointer
   vars.pointerJP = (IntPtr)0x3005CB968; //JP version pointer
   vars.pointer = IntPtr.Zero;
-  vars.igt = 0;
-  vars.previgt = 0;
-  vars.igtAux = 0;
+  vars.igt = 0.0f;
+  vars.igtMS = 0.0f;
+  vars.previgt = 0.0f;
+  vars.igtAux = 0.0f;
 }
 
 update
@@ -36,6 +38,7 @@ update
       {
         gameFound = true;
         vars.pointer = vars.pointerEU;
+        vars.pointerms = vars.pointermsEU;
       }
     }
     if (memory.ReadBytes((IntPtr)vars.pointerUS, 4, out bytesUS))
@@ -63,6 +66,12 @@ update
   {
     Array.Reverse(bytes); // PS3 is big endian
     vars.igt = BitConverter.ToInt32(bytes, 0);
+    var bytes2 = new byte[4] {0, 0, 0, 0};
+    if (memory.ReadBytes((IntPtr)vars.pointerms, 4, out bytes2))
+    {
+      Array.Reverse(bytes2); // PS3 is big endian
+      vars.igtMS = BitConverter.ToSingle(bytes2, 0);
+    }
     if (settings["IGT for Challenges"]) //Makes IGT never go back
     {
       if (vars.igt > vars.previgt)
@@ -116,14 +125,13 @@ isLoading
 
 gameTime
 {
-  // vars.ms = (int)(DateTime.Now.TimeOfDay.TotalMilliseconds % 1000);
   // IGT is in seconds
   if (settings["IGT for Challenges"])
   {
-    return TimeSpan.FromSeconds(vars.igtAux);
+    return TimeSpan.FromSeconds(vars.igtAux+vars.igtMS);
   }
   else
   {
-    return TimeSpan.FromSeconds(vars.igt);
+    return TimeSpan.FromSeconds(vars.igt+vars.igtMS);
   }
 }
