@@ -68,7 +68,7 @@ update
     Array.Reverse(bytes); // PS3 is big endian
     vars.igt = BitConverter.ToInt32(bytes, 0);
     var bytes2 = new byte[4] {0, 0, 0, 0};
-    if (memory.ReadBytes((IntPtr)vars.pointerms, 4, out bytes2))
+    if (vars.pointerms != 0 && memory.ReadBytes((IntPtr)vars.pointerms, 4, out bytes2))
     {
       Array.Reverse(bytes2); // PS3 is big endian
       vars.igtMS = BitConverter.ToSingle(bytes2, 0);
