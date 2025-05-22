@@ -15,6 +15,7 @@ init
   vars.pointerUS = (IntPtr)0x300589368; //US version pointer
   vars.pointerJP = (IntPtr)0x3005CB968; //JP version pointer
   vars.pointer = IntPtr.Zero;
+  vars.pointerms = IntPtr.Zero;
   vars.igt = 0.0f;
   vars.igtMS = 0.0f;
   vars.previgt = 0.0f;
