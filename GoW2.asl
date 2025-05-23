@@ -20,6 +20,7 @@ init
   vars.igtMS = 0.0f;
   vars.previgt = 0.0f;
   vars.igtAux = 0.0f;
+  vars.isEU = false;
 }
 
 update
@@ -38,6 +39,7 @@ update
       if (BitConverter.ToInt32(bytesEU, 0) >= 1 && BitConverter.ToInt32(bytesEU, 0) < 1000000)
       {
         gameFound = true;
+        vars.isEU = true;
         vars.pointer = vars.pointerEU;
         vars.pointerms = vars.pointermsEU;
       }
@@ -68,7 +70,7 @@ update
     Array.Reverse(bytes); // PS3 is big endian
     vars.igt = BitConverter.ToInt32(bytes, 0);
     var bytes2 = new byte[4] {0, 0, 0, 0};
-    if (vars.pointerms != 0 && memory.ReadBytes((IntPtr)vars.pointerms, 4, out bytes2))
+    if (vars.isEU && memory.ReadBytes((IntPtr)vars.pointerms, 4, out bytes2))
     {
       Array.Reverse(bytes2); // PS3 is big endian
       vars.igtMS = BitConverter.ToSingle(bytes2, 0);
