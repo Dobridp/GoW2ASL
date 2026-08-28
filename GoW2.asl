@@ -119,6 +119,10 @@ isLoading
   {
     return true;
   }
+  else
+  {
+    return false;
+  }
 }
 /*
 start
